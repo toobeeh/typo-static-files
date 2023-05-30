@@ -4,7 +4,6 @@ $sprite = substr(parse_url($_GET["url"], PHP_URL_PATH),1);
 //echo $sprite;
 $hue = $_GET["hue"];
 
-
 function modulateImage($imagePath, $hue, $brightness, $saturation) {
     $imagick = new \Imagick(realpath($imagePath));
     $imagick = $imagick->coalesceImages();
