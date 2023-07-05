@@ -15,6 +15,7 @@
 
       //$imagick = $imagick->deconstructImages();
       header("Content-Type: image/gif");
+      header("Cache-Control: max-age=2592000"); 
       echo $imagick->getImagesBlob();
   }
 
