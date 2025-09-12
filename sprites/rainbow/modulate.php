@@ -6,38 +6,51 @@
  *   /sprites/rainbow/modulate.php?url=https://static.typo.rip/sprites/regular/sptFlying_Scarf.gif&hue=50
  *
  * Params:
- *   - url (string, required)  URL to sprite (path must resolve inside sprites dir)
+ *   - url (string, required)  URL to sprite (path must resolve inside sprites dir or scenes dir)
  *   - hue (float, required)   Hue shift in range from 0 to 200, 100 means no shift, 0 is a special value that makes the sprite greyscale
  *
  * Output:
  *   - image/gif
  */
 
-$spritesDir = realpath(__DIR__ . '/../../sprites');
+$projectRoot = realpath(__DIR__ . '/../../');
 
-if ($spritesDir === false || !is_dir($spritesDir)) {
+if ($projectRoot === false) {
+    http_response_code(500);
+    exit('Server misconfig');
+}
+
+$projectRoot = rtrim($projectRoot, '/') . '/';
+$spritesDir = realpath($projectRoot . 'sprites');
+$scenesDir  = realpath($projectRoot . 'scenes');
+
+if (
+    $spritesDir === false 
+    || !is_dir($spritesDir)
+    || $scenesDir === false 
+    || !is_dir($scenesDir)
+) {
     http_response_code(500); 
     exit('Server misconfig');
 }
 
 $spritesDir = rtrim($spritesDir, '/') . '/';
+$scenesDir = rtrim($scenesDir, '/') . '/';
 
 // Resolve path
 $rawUrl = $_GET['url'] ?? '';
 $path = parse_url($rawUrl, PHP_URL_PATH) ?? '';
 $path = ltrim($path, '/');
 
-if (str_starts_with($path, 'sprites/')) {
-    $path = substr($path, strlen('sprites/'));
-    $path = ltrim($path, '/');
-}
-
-$candidatePath = $spritesDir . $path;
+$candidatePath = $projectRoot . $path;
 $resolvedPath = realpath($candidatePath);
 
 if (
     $resolvedPath === false
-    || !str_starts_with($resolvedPath, $spritesDir)
+    || (
+        !str_starts_with($resolvedPath, $spritesDir) 
+        && !str_starts_with($resolvedPath, $scenesDir)
+    )
     || !str_ends_with(strtolower($resolvedPath), '.gif')
     || !is_readable($resolvedPath)
 ) {
